@@ -15,11 +15,12 @@ public class ModCreativeModeTabs {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TAB =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, EuropicaShows.MOD_ID);
 
-    public static final Supplier<CreativeModeTab> EUROPICA_MOD = CREATIVE_MODE_TAB.register("europica_mod_tab",
+    public static final Supplier<CreativeModeTab> EUROPICA_SHOWS = CREATIVE_MODE_TAB.register("europica_shows_tab",
             () -> CreativeModeTab.builder().icon(() -> new ItemStack(Items.BEACON))
-                    .title(Component.translatable("creativetab.europicamod.europica_mod"))
+                    .title(Component.translatable("creativetab.europicashows.europica_europica_shows"))
                     .displayItems((itemDisplayParameters, output) -> {
 
+                    output.accept(ModItems.RAT_SANDWICH);
 
                     }).build());
 
