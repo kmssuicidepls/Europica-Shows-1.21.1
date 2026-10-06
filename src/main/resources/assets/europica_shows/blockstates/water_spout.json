@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "europica_shows:block/water_spout"
+      }
+    }
+  ]
+}

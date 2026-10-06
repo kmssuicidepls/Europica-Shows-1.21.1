@@ -1,6 +1,7 @@
 package com.kmssuicidepls.europica_shows;
 
 import com.kmssuicidepls.europica_shows.block.ModBlocks;
+import com.kmssuicidepls.europica_shows.block.entity.ModBlockEntities;
 import com.kmssuicidepls.europica_shows.items.ModCreativeModeTabs;
 import com.kmssuicidepls.europica_shows.items.ModItems;
 import com.kmssuicidepls.europica_shows.registry.ModMenuTypes;
@@ -36,6 +37,7 @@ public class EuropicaShows {
         ModCreativeModeTabs.register(modEventBus);
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
+        ModBlockEntities.register(modEventBus);
         ModSounds.register(modEventBus);
         ModMenuTypes.MENUS.register(modEventBus);
 

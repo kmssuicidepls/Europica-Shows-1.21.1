@@ -1,6 +1,7 @@
 package com.kmssuicidepls.europica_shows.items;
 
 import com.kmssuicidepls.europica_shows.EuropicaShows;
+import com.kmssuicidepls.europica_shows.block.ModBlocks;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -20,6 +21,9 @@ public class ModCreativeModeTabs {
                     .title(Component.translatable("creativetab.europicashows.europica_europica_shows"))
                     .displayItems((itemDisplayParameters, output) -> {
 
+                    output.accept(ModBlocks.WATER_SPOUT);
+
+                    output.accept(ModItems.BEAM_PROJECTOR);
                     output.accept(ModItems.RAT_SANDWICH);
 
                     }).build());
