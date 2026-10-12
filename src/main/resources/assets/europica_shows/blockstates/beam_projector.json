@@ -1,7 +1,9 @@
 {
-  "variants": {
-    "": {
-      "model": "europica_shows:block/beam_projector"
+  "multipart": [
+    {
+      "apply": {
+        "model": "europica_shows:block/beam_projector"
+      }
     }
-  }
+  ]
 }

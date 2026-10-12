@@ -24,6 +24,8 @@ public class ModCreativeModeTabs {
                     output.accept(ModBlocks.WATER_SPOUT);
 
                     output.accept(ModItems.BEAM_PROJECTOR);
+                    output.accept(ModItems.SPOTLIGHT);
+                    output.accept(ModItems.STONE_CONDUIT);
                     output.accept(ModItems.RAT_SANDWICH);
 
                     }).build());

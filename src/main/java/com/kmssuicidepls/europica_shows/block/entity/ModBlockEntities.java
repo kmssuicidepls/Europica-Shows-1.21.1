@@ -16,7 +16,8 @@ public class ModBlockEntities {
     public static final Supplier<BlockEntityType<BeamProjectorBlockEntity>> BEAM_PROJECTOR =
             BLOCK_ENTITIES.register("beam_projector", () ->
                     BlockEntityType.Builder.of(BeamProjectorBlockEntity::new,
-                            ModBlocks.BEAM_PROJECTOR.get()).build(null));
+                            ModBlocks.BEAM_PROJECTOR.get(),
+                            ModBlocks.SPOTLIGHT.get()).build(null));
 
     public static void register(IEventBus eventBus) {
         BLOCK_ENTITIES.register(eventBus);

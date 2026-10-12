@@ -1,6 +1,7 @@
 package com.kmssuicidepls.europica_shows.block;
 
 import com.kmssuicidepls.europica_shows.EuropicaShows;
+import com.kmssuicidepls.europica_shows.block.custom.RedstoneConduitBlock;
 import com.kmssuicidepls.europica_shows.block.custom.WaterSpoutBlock;
 import com.kmssuicidepls.europica_shows.items.ModItems;
 import net.minecraft.util.valueproviders.UniformInt;
@@ -10,6 +11,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DropExperienceBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.redstone.Redstone;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -32,6 +34,17 @@ public class ModBlocks {
     public static final DeferredBlock<BeamProjectorBlock> BEAM_PROJECTOR =
             BLOCKS.registerBlock("beam_projector", BeamProjectorBlock::new,
                     BlockBehaviour.Properties.of().strength(2.0f));
+
+    public static final DeferredBlock<SpotlightBlock> SPOTLIGHT =
+            BLOCKS.registerBlock("spotlight", SpotlightBlock::new,
+                    BlockBehaviour.Properties.of().strength(2.0f));
+
+    public static final DeferredBlock<RedstoneConduitBlock> STONE_CONDUIT =
+            BLOCKS.registerBlock("stone_conduit", RedstoneConduitBlock::new,
+                    BlockBehaviour.Properties.of()
+                            .strength(1.5f)
+                            .isRedstoneConductor((state, level, pos) -> false));
+
 
 
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {

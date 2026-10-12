@@ -1,6 +1,6 @@
 package com.kmssuicidepls.europica_shows.menu;
 
-import com.kmssuicidepls.europica_shows.block.ModBlocks;
+import com.kmssuicidepls.europica_shows.block.BeamProjectorBlock;
 import com.kmssuicidepls.europica_shows.block.entity.BeamProjectorBlockEntity;
 import com.kmssuicidepls.europica_shows.registry.ModMenuTypes;
 import net.minecraft.core.BlockPos;
@@ -43,6 +43,8 @@ public class BeamProjectorMenu extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(Player player) {
-        return stillValid(ContainerLevelAccess.create(level, pos), player, ModBlocks.BEAM_PROJECTOR.get());
+        return ContainerLevelAccess.create(level, pos).evaluate((lvl, p) ->
+                lvl.getBlockState(p).getBlock() instanceof BeamProjectorBlock
+                        && player.distanceToSqr(p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5) <= 64.0, true);
     }
 }

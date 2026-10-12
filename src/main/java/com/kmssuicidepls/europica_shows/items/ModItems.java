@@ -24,6 +24,13 @@ public class ModItems {
     public static final DeferredItem<BlockItem> BEAM_PROJECTOR =
             ITEMS.registerSimpleBlockItem("beam_projector", ModBlocks.BEAM_PROJECTOR);
 
+    public static final DeferredItem<BlockItem> SPOTLIGHT =
+            ITEMS.registerSimpleBlockItem("spotlight", ModBlocks.SPOTLIGHT);
+
+    public static final DeferredItem<BlockItem> STONE_CONDUIT =
+            ITEMS.registerSimpleBlockItem("stone_conduit", ModBlocks.STONE_CONDUIT);
+
+
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);
     }

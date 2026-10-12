@@ -6,6 +6,7 @@ import com.kmssuicidepls.europica_shows.network.UpdateBeamPayload;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -140,6 +141,18 @@ public class BeamProjectorScreen extends AbstractContainerScreen<BeamProjectorMe
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    // AbstractContainerScreen overrides mouseDragged for item-slot dragging and never forwards it
+    // to widgets, so sliders could be clicked but not dragged. Forward it ourselves.
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        GuiEventListener focused = getFocused();
+        if (focused != null && isDragging() && button == 0
+                && focused.mouseDragged(mouseX, mouseY, button, dragX, dragY)) {
+            return true;
+        }
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
     }
 
     // ---- Rendering ----
