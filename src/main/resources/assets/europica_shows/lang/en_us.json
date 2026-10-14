@@ -1,9 +1,10 @@
 {
 "creativetab.europicashows.europica_europica_shows": "Europica Shows",
 
-"block.europica_shows.water_spout": "Water Spout",
+"block.europica_shows.water_spout": "Particle Projector",
 "block.europica_shows.beam_projector": "Beam Projector",
 "block.europica_shows.spotlight": "Spotlight",
+"block.europica_shows.strobe_light": "Strobe Light",
 "block.europica_shows.stone_conduit": "Stone Conduit",
 
   "item.europica_shows.rat_sandwich": "Rat Sandwich"

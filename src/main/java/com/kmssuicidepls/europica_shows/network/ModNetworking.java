@@ -13,5 +13,7 @@ public class ModNetworking {
     public static void register(RegisterPayloadHandlersEvent event) {
         PayloadRegistrar registrar = event.registrar("1");
         registrar.playToServer(UpdateBeamPayload.TYPE, UpdateBeamPayload.STREAM_CODEC, UpdateBeamPayload::handle);
+        registrar.playToServer(UpdateSpoutPayload.TYPE, UpdateSpoutPayload.STREAM_CODEC, UpdateSpoutPayload::handle);
+        registrar.playToServer(UpdateStrobePayload.TYPE, UpdateStrobePayload.STREAM_CODEC, UpdateStrobePayload::handle);
     }
 }

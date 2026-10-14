@@ -19,6 +19,16 @@ public class ModBlockEntities {
                             ModBlocks.BEAM_PROJECTOR.get(),
                             ModBlocks.SPOTLIGHT.get()).build(null));
 
+    public static final Supplier<BlockEntityType<WaterSpoutBlockEntity>> WATER_SPOUT =
+            BLOCK_ENTITIES.register("water_spout", () ->
+                    BlockEntityType.Builder.of(WaterSpoutBlockEntity::new,
+                            ModBlocks.WATER_SPOUT.get()).build(null));
+
+    public static final Supplier<BlockEntityType<StrobeLightBlockEntity>> STROBE_LIGHT =
+            BLOCK_ENTITIES.register("strobe_light", () ->
+                    BlockEntityType.Builder.of(StrobeLightBlockEntity::new,
+                            ModBlocks.STROBE_LIGHT.get()).build(null));
+
     public static void register(IEventBus eventBus) {
         BLOCK_ENTITIES.register(eventBus);
     }

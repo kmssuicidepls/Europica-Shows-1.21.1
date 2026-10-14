@@ -52,10 +52,16 @@ public class BeamProjectorRenderer implements BlockEntityRenderer<BeamProjectorB
         // Pivot around the center of the block
         pose.translate(0.5, 0.5, 0.5);
 
+        // Position offset in world axes (set in the menu)
+        pose.translate(be.getOffsetX(), be.getOffsetY(), be.getOffsetZ());
+
         // Applied bottom-up: tilt from vertical by (90 - pitch), then turn by yaw.
         // Yaw follows Minecraft's convention (0 = south, 90 = west); pitch is positive upward.
         pose.mulPose(Axis.YP.rotationDegrees(-be.getYaw()));
         pose.mulPose(Axis.XP.rotationDegrees(90.0f - be.getPitch()));
+
+        // Start distance: slide the start point out along the direction the beam points
+        pose.translate(0.0, be.getStartDistance(), 0.0);
 
         if (be.getBlockState().getBlock() instanceof SpotlightBlock) {
             renderCone(be, level, partialTick, pose, buffers);
@@ -66,7 +72,7 @@ public class BeamProjectorRenderer implements BlockEntityRenderer<BeamProjectorB
                     pose, buffers, BeaconRenderer.BEAM_LOCATION,
                     partialTick, 1.0f, level.getGameTime(),
                     0, (int) BeamProjectorBlockEntity.BEAM_LENGTH,
-                    0xFF000000 | be.getColor(),
+                    0xFF000000 | be.getEffectiveColor(),
                     0.2f, 0.25f);
         }
 
@@ -78,7 +84,7 @@ public class BeamProjectorRenderer implements BlockEntityRenderer<BeamProjectorB
                             PoseStack pose, MultiBufferSource buffers) {
         VertexConsumer consumer = buffers.getBuffer(RenderType.beaconBeam(SPOTLIGHT_TEXTURE, true));
         PoseStack.Pose last = pose.last();
-        int rgb = be.getColor() & 0xFFFFFF;
+        int rgb = be.getEffectiveColor() & 0xFFFFFF;
 
         // Scroll loops seamlessly because the texture tiles exactly once per unit of V
         long time = level.getGameTime();
@@ -125,7 +131,8 @@ public class BeamProjectorRenderer implements BlockEntityRenderer<BeamProjectorB
     // Keeps the beam visible when the block itself is off-screen
     @Override
     public AABB getRenderBoundingBox(BeamProjectorBlockEntity be) {
-        return new AABB(be.getBlockPos()).inflate(BeamProjectorBlockEntity.BEAM_LENGTH);
+        return new AABB(be.getBlockPos()).inflate(BeamProjectorBlockEntity.BEAM_LENGTH
+                + BeamProjectorBlockEntity.MAX_OFFSET + BeamProjectorBlockEntity.MAX_START);
     }
 
     @Override

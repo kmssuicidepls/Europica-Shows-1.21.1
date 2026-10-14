@@ -15,6 +15,8 @@ public class ClientSetup {
     @SubscribeEvent
     public static void registerScreens(RegisterMenuScreensEvent event) {
         event.register(ModMenuTypes.BEAM_PROJECTOR_MENU.get(), BeamProjectorScreen::new);
+        event.register(ModMenuTypes.WATER_SPOUT_MENU.get(), WaterSpoutScreen::new);
+        event.register(ModMenuTypes.STROBE_LIGHT_MENU.get(), StrobeLightScreen::new);
     }
 
     @SubscribeEvent

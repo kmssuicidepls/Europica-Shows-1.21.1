@@ -1,0 +1,7 @@
+{
+  "parent": "europica_shows:block/strobe_light",
+  "textures": {
+    "0": "europica_shows:block/strobe_light_on",
+    "particle": "europica_shows:block/strobe_light_on"
+  }
+}

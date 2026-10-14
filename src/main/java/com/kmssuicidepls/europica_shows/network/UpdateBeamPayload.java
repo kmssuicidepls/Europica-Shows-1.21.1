@@ -12,9 +12,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
+import org.joml.Vector3f;
 
 /** Sent from the client menu to the server whenever a slider or text box changes. */
-public record UpdateBeamPayload(BlockPos pos, float yaw, float pitch, int color) implements CustomPacketPayload {
+public record UpdateBeamPayload(BlockPos pos, float yaw, float pitch, int color,
+                                Vector3f offset, float startDistance) implements CustomPacketPayload {
 
     public static final Type<UpdateBeamPayload> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(EuropicaShows.MOD_ID, "update_beam"));
@@ -25,6 +27,8 @@ public record UpdateBeamPayload(BlockPos pos, float yaw, float pitch, int color)
                     ByteBufCodecs.FLOAT, UpdateBeamPayload::yaw,
                     ByteBufCodecs.FLOAT, UpdateBeamPayload::pitch,
                     ByteBufCodecs.INT, UpdateBeamPayload::color,
+                    ByteBufCodecs.VECTOR3F, UpdateBeamPayload::offset,
+                    ByteBufCodecs.FLOAT, UpdateBeamPayload::startDistance,
                     UpdateBeamPayload::new);
 
     @Override
@@ -42,7 +46,9 @@ public record UpdateBeamPayload(BlockPos pos, float yaw, float pitch, int color)
             if (player.distanceToSqr(Vec3.atCenterOf(payload.pos())) > 64.0) return;
 
             if (player.level().getBlockEntity(payload.pos()) instanceof BeamProjectorBlockEntity be) {
-                be.setSettings(payload.yaw(), payload.pitch(), payload.color());
+                Vector3f o = payload.offset();
+                be.setSettings(payload.yaw(), payload.pitch(), payload.color(),
+                        o.x(), o.y(), o.z(), payload.startDistance());
             }
         });
     }

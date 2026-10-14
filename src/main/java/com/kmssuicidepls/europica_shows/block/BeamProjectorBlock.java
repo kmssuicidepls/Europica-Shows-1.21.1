@@ -7,7 +7,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -50,9 +52,23 @@ public class BeamProjectorBlock extends BaseEntityBlock {
                                    Block neighborBlock, BlockPos neighborPos, boolean movedByPiston) {
         if (level.isClientSide) return;
 
+        // Colored glass placed / removed next to the block changes the beam color
+        if (level.getBlockEntity(pos) instanceof BeamProjectorBlockEntity be) {
+            be.updateGlassColor();
+        }
+
         boolean powered = level.hasNeighborSignal(pos);
         if (powered != state.getValue(POWERED)) {
             level.setBlock(pos, state.setValue(POWERED, powered), Block.UPDATE_CLIENTS);
+        }
+    }
+
+    // Pick up glass that is already touching the block when it is placed
+    @Override
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+        super.setPlacedBy(level, pos, state, placer, stack);
+        if (!level.isClientSide && level.getBlockEntity(pos) instanceof BeamProjectorBlockEntity be) {
+            be.updateGlassColor();
         }
     }
 

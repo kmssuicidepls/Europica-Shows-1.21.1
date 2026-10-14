@@ -27,6 +27,9 @@ public class ModItems {
     public static final DeferredItem<BlockItem> SPOTLIGHT =
             ITEMS.registerSimpleBlockItem("spotlight", ModBlocks.SPOTLIGHT);
 
+    public static final DeferredItem<BlockItem> STROBE_LIGHT =
+            ITEMS.registerSimpleBlockItem("strobe_light", ModBlocks.STROBE_LIGHT);
+
     public static final DeferredItem<BlockItem> STONE_CONDUIT =
             ITEMS.registerSimpleBlockItem("stone_conduit", ModBlocks.STONE_CONDUIT);
 

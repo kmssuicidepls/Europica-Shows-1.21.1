@@ -12,21 +12,27 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.joml.Vector3f;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
 public class BeamProjectorScreen extends AbstractContainerScreen<BeamProjectorMenu> {
-    private static final int GUI_WIDTH = 200;
-    private static final int GUI_HEIGHT = 176;
-    private static final int SLIDER_HEIGHT = 20;
+    private static final int GUI_WIDTH = 330;
+    private static final int GUI_HEIGHT = 180;
+    private static final int ROW_HEIGHT = 20;
+    private static final int ROW_STEP = 24;
+    private static final int SLIDER_WIDTH = 106;
+    private static final int BOX_WIDTH = 38;
+    private static final int COLUMN_WIDTH = SLIDER_WIDTH + 4 + BOX_WIDTH;   // slider + gap + text box
+    private static final int RIGHT_COLUMN_X = 170;
 
-    private float yaw;
-    private float pitch;
+    private float yaw, pitch, startDistance, offsetX, offsetY, offsetZ;
     private int red = 255, green = 255, blue = 255;
 
-    private ValueSlider yawSlider, pitchSlider;
-    private EditBox yawBox, pitchBox;
+    private final List<EditBox> boxes = new ArrayList<>();
     private boolean syncing = false;
 
     public BeamProjectorScreen(BeamProjectorMenu menu, Inventory inventory, Component title) {
@@ -38,86 +44,96 @@ public class BeamProjectorScreen extends AbstractContainerScreen<BeamProjectorMe
     @Override
     protected void init() {
         super.init();
+        boxes.clear();
 
         BeamProjectorBlockEntity be = menu.getBlockEntity();
         if (be != null) {
             yaw = be.getYaw();
             pitch = be.getPitch();
+            startDistance = be.getStartDistance();
+            offsetX = be.getOffsetX();
+            offsetY = be.getOffsetY();
+            offsetZ = be.getOffsetZ();
             int c = be.getColor();
             red = (c >> 16) & 0xFF;
             green = (c >> 8) & 0xFF;
             blue = c & 0xFF;
         }
 
-        int x = leftPos + 10;
-        int sliderWidth = 136;
-        int boxX = x + sliderWidth + 6;
-        int boxWidth = 38;
+        int left = leftPos + 10;
+        int right = leftPos + RIGHT_COLUMN_X;
+        int top = topPos + 22;
 
-        // --- Direction: slider for quick changes, text box for exact values ---
-        int yawY = topPos + 22;
-        yawSlider = addRenderableWidget(new ValueSlider(x, yawY, sliderWidth, SLIDER_HEIGHT,
-                "Yaw", 0, 360, yaw, 1, v -> {
-                    yaw = (float) (Math.round(v * 10.0) / 10.0);
-                    setBoxText(yawBox, yaw);
-                    sendUpdate();
-                }));
-        yawBox = addRenderableWidget(new EditBox(font, boxX, yawY, boxWidth, SLIDER_HEIGHT, Component.literal("Yaw")));
-        yawBox.setFilter(s -> s.matches("-?\\d*\\.?\\d*"));
-        yawBox.setValue(format(yaw));
-        yawBox.setResponder(this::onYawText);
+        // Left column: direction and start distance
+        new NumberRow(left, top, "Yaw", 0, 360, yaw, v -> yaw = v);
+        new NumberRow(left, top + ROW_STEP, "Pitch", -90, 90, pitch, v -> pitch = v);
+        new NumberRow(left, top + ROW_STEP * 2, "Start", 0, BeamProjectorBlockEntity.MAX_START,
+                startDistance, v -> startDistance = v);
 
-        int pitchY = topPos + 46;
-        pitchSlider = addRenderableWidget(new ValueSlider(x, pitchY, sliderWidth, SLIDER_HEIGHT,
-                "Pitch", -90, 90, pitch, 1, v -> {
-                    pitch = (float) (Math.round(v * 10.0) / 10.0);
-                    setBoxText(pitchBox, pitch);
-                    sendUpdate();
-                }));
-        pitchBox = addRenderableWidget(new EditBox(font, boxX, pitchY, boxWidth, SLIDER_HEIGHT, Component.literal("Pitch")));
-        pitchBox.setFilter(s -> s.matches("-?\\d*\\.?\\d*"));
-        pitchBox.setValue(format(pitch));
-        pitchBox.setResponder(this::onPitchText);
+        // Right column: position offset
+        float max = BeamProjectorBlockEntity.MAX_OFFSET;
+        new NumberRow(right, top, "Offset X", -max, max, offsetX, v -> offsetX = v);
+        new NumberRow(right, top + ROW_STEP, "Offset Y", -max, max, offsetY, v -> offsetY = v);
+        new NumberRow(right, top + ROW_STEP * 2, "Offset Z", -max, max, offsetZ, v -> offsetZ = v);
 
-        // --- Color ---
-        int fullWidth = GUI_WIDTH - 20;
-        addRenderableWidget(new ValueSlider(x, topPos + 78, fullWidth, SLIDER_HEIGHT,
+        // Color sliders (left, lower), preview swatch is drawn on the right
+        int colorTop = topPos + 100;
+        addRenderableWidget(new ValueSlider(left, colorTop, COLUMN_WIDTH, ROW_HEIGHT,
                 "Red", 0, 255, red, 0, v -> { red = (int) Math.round(v); sendUpdate(); }));
-        addRenderableWidget(new ValueSlider(x, topPos + 102, fullWidth, SLIDER_HEIGHT,
+        addRenderableWidget(new ValueSlider(left, colorTop + ROW_STEP, COLUMN_WIDTH, ROW_HEIGHT,
                 "Green", 0, 255, green, 0, v -> { green = (int) Math.round(v); sendUpdate(); }));
-        addRenderableWidget(new ValueSlider(x, topPos + 126, fullWidth, SLIDER_HEIGHT,
+        addRenderableWidget(new ValueSlider(left, colorTop + ROW_STEP * 2, COLUMN_WIDTH, ROW_HEIGHT,
                 "Blue", 0, 255, blue, 0, v -> { blue = (int) Math.round(v); sendUpdate(); }));
     }
 
-    // ---- Text box handling ----
+    // ---- A slider plus a text box for exact values, kept in sync with each other ----
 
-    private void onYawText(String text) {
-        if (syncing) return;
-        try {
-            yaw = Mth.clamp(Float.parseFloat(text), 0.0f, 360.0f);
-        } catch (NumberFormatException e) {
-            return;   // incomplete input like "-" or "."
+    private class NumberRow {
+        private final ValueSlider slider;
+        private final EditBox box;
+        private final float min;
+        private final float max;
+        private final Consumer<Float> setter;
+
+        NumberRow(int x, int y, String label, float min, float max, float initial, Consumer<Float> setter) {
+            this.min = min;
+            this.max = max;
+            this.setter = setter;
+
+            this.slider = new ValueSlider(x, y, SLIDER_WIDTH, ROW_HEIGHT, label, min, max, initial, 1, v -> {
+                float rounded = (float) (Math.round(v * 10.0) / 10.0);
+                this.setter.accept(rounded);
+                setBoxText(rounded);
+                sendUpdate();
+            });
+
+            this.box = new EditBox(font, x + SLIDER_WIDTH + 4, y, BOX_WIDTH, ROW_HEIGHT, Component.literal(label));
+            this.box.setFilter(s -> s.matches("-?\\d*\\.?\\d*"));
+            this.box.setValue(format(initial));
+            this.box.setResponder(this::onText);
+
+            addRenderableWidget(slider);
+            addRenderableWidget(box);
+            boxes.add(box);
         }
-        yawSlider.setReal(yaw);
-        sendUpdate();
-    }
 
-    private void onPitchText(String text) {
-        if (syncing) return;
-        try {
-            pitch = Mth.clamp(Float.parseFloat(text), -90.0f, 90.0f);
-        } catch (NumberFormatException e) {
-            return;
+        private void setBoxText(float value) {
+            syncing = true;
+            box.setValue(format(value));
+            syncing = false;
         }
-        pitchSlider.setReal(pitch);
-        sendUpdate();
-    }
 
-    private void setBoxText(EditBox box, float value) {
-        if (box == null) return;
-        syncing = true;
-        box.setValue(format(value));
-        syncing = false;
+        private void onText(String text) {
+            if (syncing) return;
+            try {
+                float value = Mth.clamp(Float.parseFloat(text), min, max);
+                setter.accept(value);
+                slider.setReal(value);
+                sendUpdate();
+            } catch (NumberFormatException ignored) {
+                // incomplete input like "-" or "."
+            }
+        }
     }
 
     private static String format(float value) {
@@ -129,16 +145,23 @@ public class BeamProjectorScreen extends AbstractContainerScreen<BeamProjectorMe
     }
 
     private void sendUpdate() {
-        PacketDistributor.sendToServer(new UpdateBeamPayload(menu.getPos(), yaw, pitch, packedColor()));
+        PacketDistributor.sendToServer(new UpdateBeamPayload(
+                menu.getPos(), yaw, pitch, packedColor(),
+                new Vector3f(offsetX, offsetY, offsetZ), startDistance));
     }
 
-    // ---- Input: stop typing letters (like 'E') from closing the screen while a box is focused ----
+    // ---- Input ----
 
+    // Stop typing letters (like 'E') from closing the screen while a text box is focused
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode != 256 /* ESC */ && (yawBox.canConsumeInput() || pitchBox.canConsumeInput())) {
-            (yawBox.canConsumeInput() ? yawBox : pitchBox).keyPressed(keyCode, scanCode, modifiers);
-            return true;
+        if (keyCode != 256 /* ESC */) {
+            for (EditBox box : boxes) {
+                if (box.canConsumeInput()) {
+                    box.keyPressed(keyCode, scanCode, modifiers);
+                    return true;
+                }
+            }
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
@@ -163,15 +186,21 @@ public class BeamProjectorScreen extends AbstractContainerScreen<BeamProjectorMe
         g.fill(leftPos - 1, topPos - 1, leftPos + imageWidth + 1, topPos + imageHeight + 1, 0xFF000000);
         g.fill(leftPos, topPos, leftPos + imageWidth, topPos + imageHeight, 0xFF3A3A3A);
 
-        // Live color preview
-        int swatchY = topPos + 152;
-        g.fill(leftPos + 9, swatchY - 1, leftPos + imageWidth - 9, swatchY + 17, 0xFF000000);
-        g.fill(leftPos + 10, swatchY, leftPos + imageWidth - 10, swatchY + 16, 0xFF000000 | packedColor());
+        // Live color preview (right column, under the offset rows)
+        int x0 = leftPos + RIGHT_COLUMN_X;
+        int y0 = topPos + 100;
+        int x1 = x0 + COLUMN_WIDTH;
+        int y1 = y0 + ROW_STEP * 2 + ROW_HEIGHT;
+        g.fill(x0 - 1, y0 - 1, x1 + 1, y1 + 1, 0xFF000000);
+        BeamProjectorBlockEntity be = menu.getBlockEntity();
+        int shown = be != null && be.hasGlassColor() ? be.getGlassColor() : packedColor();
+        g.fill(x0, y0, x1, y1, 0xFF000000 | shown);
     }
 
     @Override
     protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
         g.drawString(font, title, 10, 8, 0xFFFFFF, false);
+        g.drawString(font, "Position offset (blocks)", RIGHT_COLUMN_X, 8, 0xAAAAAA, false);
     }
 
     // ---- Slider that maps 0..1 onto a real range ----

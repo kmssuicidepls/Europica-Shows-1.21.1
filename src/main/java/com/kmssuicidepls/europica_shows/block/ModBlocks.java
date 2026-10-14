@@ -2,7 +2,8 @@ package com.kmssuicidepls.europica_shows.block;
 
 import com.kmssuicidepls.europica_shows.EuropicaShows;
 import com.kmssuicidepls.europica_shows.block.custom.RedstoneConduitBlock;
-import com.kmssuicidepls.europica_shows.block.custom.WaterSpoutBlock;
+import com.kmssuicidepls.europica_shows.block.entity.WaterSpoutBlockEntity;
+import com.kmssuicidepls.europica_shows.block.entity.WaterSpoutBlockEntity;
 import com.kmssuicidepls.europica_shows.items.ModItems;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.item.BlockItem;
@@ -29,15 +30,25 @@ public class ModBlocks {
 
     public static final DeferredBlock<WaterSpoutBlock> WATER_SPOUT =
             BLOCKS.registerBlock("water_spout", WaterSpoutBlock::new,
-                    BlockBehaviour.Properties.of().strength(2.0f));
+                    BlockBehaviour.Properties.of()
+                            .strength(2.0f));
 
     public static final DeferredBlock<BeamProjectorBlock> BEAM_PROJECTOR =
             BLOCKS.registerBlock("beam_projector", BeamProjectorBlock::new,
-                    BlockBehaviour.Properties.of().strength(2.0f));
+                    BlockBehaviour.Properties.of()
+                            .strength(2.0f));
 
     public static final DeferredBlock<SpotlightBlock> SPOTLIGHT =
             BLOCKS.registerBlock("spotlight", SpotlightBlock::new,
-                    BlockBehaviour.Properties.of().strength(2.0f));
+                    BlockBehaviour.Properties.of()
+                            .strength(2.0f));
+
+    public static final DeferredBlock<StrobeLightBlock> STROBE_LIGHT =
+            BLOCKS.registerBlock("strobe_light", StrobeLightBlock::new,
+                    BlockBehaviour.Properties.of()
+                            .strength(2.0f)
+                            .noOcclusion()
+                            .lightLevel(state -> state.getValue(StrobeLightBlock.LIT) ? 15 : 0));
 
     public static final DeferredBlock<RedstoneConduitBlock> STONE_CONDUIT =
             BLOCKS.registerBlock("stone_conduit", RedstoneConduitBlock::new,

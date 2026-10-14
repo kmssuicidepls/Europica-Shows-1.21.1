@@ -25,6 +25,7 @@ public class ModCreativeModeTabs {
 
                     output.accept(ModItems.BEAM_PROJECTOR);
                     output.accept(ModItems.SPOTLIGHT);
+                    output.accept(ModItems.STROBE_LIGHT);
                     output.accept(ModItems.STONE_CONDUIT);
                     output.accept(ModItems.RAT_SANDWICH);
 
